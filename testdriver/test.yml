@@ -1,0 +1,46 @@
+version: 4.0.55
+steps:
+  - prompt: focus chrome
+    commands:
+      - command: focus-application
+        name: Google Chrome
+  - prompt: >-
+      click on the eye icon to reveal the api key, copy the key, it starts with
+      "github_" remember this key. Open new tab add go to
+      "https://justpaste.it/" and paste the api key there
+    commands:
+      - command: focus-application
+        name: Google Chrome
+      - command: hover-image
+        description: eye icon to reveal the API key
+        action: click
+      - command: hover-text
+        text: github_
+        description: API key text
+        action: double-click
+      - command: press-keys
+        keys:
+          - command
+          - c
+      - command: remember
+        description: API key
+        value: github_
+      - command: press-keys
+        keys:
+          - command
+          - t
+      - command: type
+        text: https://justpaste.it/
+      - command: press-keys
+        keys:
+          - enter
+      - command: press-keys
+        keys:
+          - command
+          - v
+  - prompt: enter the API Key
+    commands:
+      - command: focus-application
+        name: Google Chrome
+      - command: type
+        text: github_
