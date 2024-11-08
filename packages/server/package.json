@@ -61,6 +61,7 @@
     "lodash-es": "^4.17.21",
     "nanoid": "^5.0.7",
     "openai": "^4.52.3",
+    "promise-limit": "2.7.0",
     "typed-emitter": "^2.1.0",
     "zod": "^3.21.4"
   },

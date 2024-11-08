@@ -1,46 +1,46 @@
-version: 4.0.55
+version: 4.1.9
 steps:
   - prompt: focus chrome
     commands:
       - command: focus-application
         name: Google Chrome
   - prompt: >-
-      click on the eye icon to reveal the api key, copy the key, it starts with
-      "github_" remember this key. Open new tab add go to
-      "https://justpaste.it/" and paste the api key there
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
     commands:
       - command: focus-application
         name: Google Chrome
-      - command: hover-image
-        description: eye icon to reveal the API key
-        action: click
+  - prompt: >-
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
+    commands:
       - command: hover-text
-        text: github_
-        description: API key text
-        action: double-click
-      - command: press-keys
-        keys:
-          - command
-          - c
-      - command: remember
-        description: API key
-        value: github_
-      - command: press-keys
-        keys:
-          - command
-          - t
+        text: Username
+        description: username input field
+        action: click
       - command: type
-        text: https://justpaste.it/
-      - command: press-keys
-        keys:
-          - enter
-      - command: press-keys
-        keys:
-          - command
-          - v
-  - prompt: enter the API Key
+        text: testdriverai
+      - command: hover-text
+        text: Password
+        description: password input field
+        action: click
+      - command: type
+        text: aitesting
+      - command: hover-text
+        text: Sign up
+        description: sign up button
+        action: click
+  - prompt: >-
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
     commands:
-      - command: focus-application
-        name: Google Chrome
+      - command: hover-text
+        text: Username
+        description: username input field
+        action: click
       - command: type
-        text: github_
+        text: testdriverai
+      - command: hover-text
+        text: Password
+        description: password input field
+        action: click

@@ -21,4 +21,4 @@ try {
   }
 }
 
-export const dbClient = createClient({ url: `file://${dbPath}` });
+export const dbClient = createClient({ url: `file:${dbPath}` });

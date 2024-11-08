@@ -23,7 +23,7 @@ jobs:
             git clone https://github.com/testdriverai/mainframe.git
             cd mainframe
             Remove-Item -Path package-lock.json -Force
-            Remove-Item -Path node_modules -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path node_modules -Recurse -Force -ErrorAction SilentlyContinue # may have to remove this as there would be no node_modules
             npm install
             npm start
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
