@@ -7,3 +7,5 @@ node_modules/
 /mainframe.service
 
 .turbo
+
+.DS_Store
