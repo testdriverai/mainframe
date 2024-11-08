@@ -22,8 +22,8 @@ jobs:
             npm install dashcam-chrome
             npm create mainframe
             cd mainframe
-            rm -f package-lock.json
-            rm -rf node_modules
+            Remove-Item -Path package-lock.json -Force
+            Remove-Item -Path node_modules -Recurse -Force -ErrorAction SilentlyContinue
             npm install --no-optional
             npm start
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
