@@ -1,0 +1,46 @@
+version: 4.1.9
+steps:
+  - prompt: focus chrome
+    commands:
+      - command: focus-application
+        name: Google Chrome
+  - prompt: >-
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
+    commands:
+      - command: focus-application
+        name: Google Chrome
+  - prompt: >-
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
+    commands:
+      - command: hover-text
+        text: Username
+        description: username input field
+        action: click
+      - command: type
+        text: testdriverai
+      - command: hover-text
+        text: Password
+        description: password input field
+        action: click
+      - command: type
+        text: aitesting
+      - command: hover-text
+        text: Sign up
+        description: sign up button
+        action: click
+  - prompt: >-
+      click on the input field for the username and enter testdriverai and for
+      password enter aitesting and click on sign up
+    commands:
+      - command: hover-text
+        text: Username
+        description: username input field
+        action: click
+      - command: type
+        text: testdriverai
+      - command: hover-text
+        text: Password
+        description: password input field
+        action: click
