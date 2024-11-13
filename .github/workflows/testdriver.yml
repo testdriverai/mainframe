@@ -23,7 +23,11 @@ jobs:
             git clone https://github.com/testdriverai/mainframe.git
             cd mainframe
             npm install
-            node scripts/generate-env.mjs && npm run build -- --filter=!@mainframe-api/docs --ui=stream --output-logs=errors-only && npm run db:migrate && turbo run \"@mainframe-api/node#serve\" dev --env-mode=loose --filter=!@mainframe-api/node --filter=!@mainframe-api/docs --ui=tui
+            node scripts/generate-env.mjs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            npm run build -- --filter='!@mainframe-api/docs' --ui=stream --output-logs=errors-only
+            npm run db:migrate
+            turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
             exit
         env:
