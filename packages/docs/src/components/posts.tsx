@@ -16,7 +16,7 @@ export const sections = [
   return {
     name: section.name,
     pages: section.pages.map((slug) => {
-      const post = allPosts.find((post) => post.fileName === slug);
+      const post = allPosts.find((post) => post.fileName === `${slug}.md` || post.fileName === `${slug}.mdx`);
       if (!post) {
         throw new Error(`Missing post: ${slug}`);
       }
