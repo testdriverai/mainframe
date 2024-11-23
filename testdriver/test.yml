@@ -31,15 +31,24 @@ steps:
         description: sign up button
         action: click
   - prompt: >-
+<<<<<<< HEAD
       click on the input field for the username and enter testdriverai and for
       password enter aitesting and click on sign up
+=======
+      focus chrome, click on github, click on token and enter
+      and click on save
+>>>>>>> a3f54fa (fix api)
     commands:
       - command: hover-text
         text: Username
         description: username input field
         action: click
       - command: type
+<<<<<<< HEAD
         text: testdriverai
+=======
+        text: >-
+>>>>>>> a3f54fa (fix api)
       - command: hover-text
         text: Password
         description: password input field
