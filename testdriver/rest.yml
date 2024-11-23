@@ -1,0 +1,48 @@
+version: 4.1.15
+steps:
+  - prompt: >-
+      focus chrome, click on playground, click on "Display a raw.." and enter
+      "display all the repository names" and click on generate and check if the
+      repository names are displayed
+    commands:
+      - command: focus-application
+        name: Google Chrome
+  - prompt: >-
+      focus chrome, click on playground, click on "Display a raw.." and enter
+      "display all the repository names" and click on generate and check if the
+      repository names are displayed
+    commands:
+      - command: hover-text
+        text: Playground
+        description: Playground tab
+        action: click
+  - prompt: >-
+      focus chrome, click on playground, click on "Display a raw.." and enter
+      "display all the repository names" and click on generate and check if the
+      repository names are displayed
+    commands:
+      - command: hover-text
+        text: Display a raw JSON of the data
+        description: option to display raw JSON
+        action: click
+  - prompt: >-
+      focus chrome, click on playground, click on "Display a raw.." and enter
+      "display all the repository names" and click on generate and check if the
+      repository names are displayed
+    commands:
+      - command: hover-text
+        text: Display a raw JSON of the data
+        description: input field for entering text
+        action: click
+      - command: type
+        text: display all the repository names
+      - command: hover-text
+        text: Generate
+        description: button to generate output
+        action: click
+      - command: assert
+        expect: the repository names are displayed
+  - prompt: focus chrome
+    commands:
+      - command: focus-application
+        name: Google Chrome
