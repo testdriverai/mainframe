@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import cors from "cors";
 import closeWithGrace, {
   type CloseWithGraceAsyncCallback,
 } from "close-with-grace";
@@ -79,6 +80,17 @@ export function setupServer(hooks: SetupServerHooks) {
 
   const app = express();
 
+  // Add this before other middleware
+  app.use(cors({
+    origin: [
+      'http://localhost:8744',
+      'http://172.31.14.220:8744',  // Add your IP address
+      // Or allow any origin with:
+      // origin: true,
+    ],
+    credentials: true,
+  }));
+
   hooks.express?.(app);
 
   process
@@ -143,7 +155,7 @@ export function setupServer(hooks: SetupServerHooks) {
   function startListen() {
     return new Promise<void>((resolve, reject) => {
       server = app
-        .listen(port, () => {
+        .listen(port, '0.0.0.0', () => {
           printSuccess(port);
           resolve();
         })
