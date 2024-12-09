@@ -153,8 +153,9 @@ export default function DatasetTokenInput({
                 </>
               ) : integration.authType === "token" ? (
                 <>
-                  <label>Token:</label>
+                  <label htmlFor="token">Token:</label>
                   <input
+                    id="token"
                     name="token"
                     type="password"
                     className="px-2 py-1 border rounded-md w-96 max-w-full"

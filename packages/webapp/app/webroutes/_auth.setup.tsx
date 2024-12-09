@@ -70,7 +70,7 @@ export default function AuthSignup() {
           {authEnabled?.pass.enabled ? (
             <>
               <div className="grid gap-1">
-                <Label htmlFor="email">Username</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   type="text"
