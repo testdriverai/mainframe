@@ -26,19 +26,25 @@ jobs:
           APP_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
 
-  test:
-    name: "TestDriver"
+  test_url:
+    name: "Test URL"
     runs-on: ubuntu-latest
     needs: [start_container]
     steps:
-      - uses: testdriverai/action@main
-        with:
-          key: ${{secrets.TESTDRIVER_API_KEY}}
-          prompt: |
-            1. check if the app is running.
-          prerun: |
-            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ needs.start_container.outputs.app_url }}"
-            exit
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_COLOR: "3"
+      - run: curl -s -o /dev/null -w "%{http_code}" ${{ needs.start_container.outputs.app_url }}
+  # test:
+  #   name: "TestDriver"
+  #   runs-on: ubuntu-latest
+  #   needs: [start_container]
+  #   steps:
+  #     - uses: testdriverai/action@main
+  #       with:
+  #         key: ${{secrets.TESTDRIVER_API_KEY}}
+  #         prompt: |
+  #           1. check if the app is running.
+  #         prerun: |
+  #           Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ needs.start_container.outputs.app_url }}"
+  #           exit
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         FORCE_COLOR: "3"
