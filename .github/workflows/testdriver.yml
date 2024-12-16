@@ -24,7 +24,9 @@ jobs:
           ./ngrok http 8080 > ngrok.log &
           sleep 5
           APP_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
+          echo "Generated URL: $APP_URL"
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
 
   test_url:
     name: "Test URL"
@@ -32,7 +34,11 @@ jobs:
     needs: [start_container]
     steps:
       - run: |
-          echo "Checking URL: ${{needs.start_container.outputs.app_url}}/health-check"
+          echo "Received URL: ${{needs.start_container.outputs.app_url}}"
+          if [ -z "${{needs.start_container.outputs.app_url}}" ]; then
+            echo "Error: URL is empty"
+            exit 1
+          fi
           curl "${{needs.start_container.outputs.app_url}}/health-check"
   # test:
   #   name: "TestDriver"
