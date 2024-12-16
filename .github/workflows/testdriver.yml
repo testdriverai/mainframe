@@ -23,10 +23,20 @@ jobs:
         run: lt --port 8080 > lt_output.log &
       - name: Extract localtunnel URL
         run: |
-          sleep 5
-          APP_URL=$(grep -o "https://[0-9a-z]*\.loca.lt" lt_output.log)
+          sleep 10
+          while ! grep -q "https://.*\.loca.lt" lt_output.log; do
+            sleep 2
+          done
+          APP_URL=$(grep -o "https://[0-9a-z-]*\.loca.lt" lt_output.log)
+          if [ -z "$APP_URL" ]; then
+            echo "Error: Could not extract localtunnel URL"
+            cat lt_output.log
+            exit 1
+          fi
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          cat lt_output.log
+          echo "Extracted URL: $APP_URL"
+      - name: Debug localtunnel logs
+        run: cat lt_output.log
 
   test_url:
     name: "Test URL"
