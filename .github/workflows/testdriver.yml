@@ -16,19 +16,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Run Nginx Container
         run: docker run -d -p 8080:80 nginx:latest
-      - name: Setup ngrok (or similar)
+      - name: Install localtunnel
         id: expose
+        run: npm install -g localtunnel
+      - name: Run localtunnel
+        run: lt --port 8080 > lt_output.log &
+      - name: Extract localtunnel URL
         run: |
-          curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -o ngrok.zip
-          unzip ngrok.zip
-          ./ngrok http 8080 > ngrok.log &
           sleep 5
-          APP_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
-          echo "Generated URL: $APP_URL"
+          APP_URL=$(grep -o "https://[0-9a-z]*\.loca.lt" lt_output.log)
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
-      - name: Debug ngrok logs
-        run: cat ngrok.log
+          cat lt_output.log
 
   test_url:
     name: "Test URL"
