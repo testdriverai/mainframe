@@ -13,10 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Start Nginx Container
-        run: docker run -d -p 8080:80 nginx:latest
+        run: docker run -d --name nginx -p 8080:80 nginx:latest
       - name: Start ngrok Container
         run: |
-          docker run --net=host -d --name myngrok -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} ngrok/ngrok:latest http 8080
+          docker run -d --name myngrok --link nginx:nginx -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} ngrok/ngrok:latest http nginx:80
       - name: Wait for ngrok
         run: sleep 10
       - name: Debug ngrok logs
