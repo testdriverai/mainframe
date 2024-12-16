@@ -27,6 +27,8 @@ jobs:
           echo "Generated URL: $APP_URL"
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
+      - name: Debug ngrok logs
+        run: cat ngrok.log
 
   test_url:
     name: "Test URL"
