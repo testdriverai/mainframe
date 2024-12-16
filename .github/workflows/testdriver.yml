@@ -35,6 +35,7 @@ jobs:
           fi
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
           echo "Extracted URL: $APP_URL"
+          curl https://loca.lt/mytunnelpassword
       - name: Debug localtunnel logs
         run: cat lt_output.log
 
