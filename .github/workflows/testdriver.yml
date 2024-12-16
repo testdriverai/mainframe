@@ -25,11 +25,9 @@ jobs:
             -p 4040:4040 \
             ngrok/ngrok:latest http host.docker.internal:8080
 
-      # Give ngrok a moment to establish the tunnel
       - name: Wait for ngrok
-        run: sleep 5
+        run: sleep 10
 
-      # 3. Extract the public URL from ngrok logs
       - name: Get ngrok URL
         id: geturl
         run: |
@@ -39,11 +37,7 @@ jobs:
           APP_URL=$(echo "$logs" | grep -oE "https://[0-9a-zA-Z.-]+\.ngrok-free.app")
           echo "Found URL: $APP_URL"
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-      - name: Debug ngrok logs
-        run: cat ngrok.log
-
-      # 4. Test against the public URL in the same job
-      - name: Test URL
-        run: |
           echo "Testing $APP_URL"
           curl "$APP_URL"
+      - name: Debug ngrok logs
+        run: cat ngrok.log
