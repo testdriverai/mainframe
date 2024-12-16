@@ -7,32 +7,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  start_container:
+  start_and_test:
     runs-on: ubuntu-latest
-    outputs:
-      app_url: ${{ steps.expose.outputs.app_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Run Nginx Container
+
+      # 1. Run your application container
+      - name: Start Nginx Container
+        run: docker run -d --name myapp -p 8080:80 nginx:latest
+
+      # 2. Run ngrok in a Docker container, tunneling port 8080
+      - name: Start ngrok Container
         run: |
-          docker run -d -p 8080:80 nginx:latest
-      
-      - name: Install ngrok
+          docker run -d --name myngrok \
+            -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} \
+            -p 4040:4040 \
+            ngrok/ngrok:latest http host.docker.internal:8080
+
+      # Give ngrok a moment to establish the tunnel
+      - name: Wait for ngrok
+        run: sleep 5
+
+      # 3. Extract the public URL from ngrok logs
+      - name: Get ngrok URL
+        id: geturl
         run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-          sudo apt update && sudo apt install ngrok
-      
-      - name: Start ngrok and expose
-        id: expose
+          # Fetch logs from the ngrok container
+          logs=$(docker logs myngrok 2>&1)
+          echo "$logs"
+          # The logs often contain a line like:
+          # Forwarding                    https://<random>.ngrok-free.app -> http://host.docker.internal:8080
+          # Use grep or sed to extract the public URL
+          public_url=$(echo "$logs" | grep -oE "https://[0-9a-zA-Z.-]+\.ngrok-free.app")
+          echo "Found URL: $public_url"
+          echo "app_url=$public_url" >> $GITHUB_OUTPUT
+
+      # 4. Test against the public URL in the same job
+      - name: Test URL
         run: |
-          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }} || { echo "Ngrok auth token failed"; exit 1; }
-          ngrok http 8080 > ngrok.log &
-          sleep 10
-          curl --silent http://localhost:4040/api/tunnels > tunnels.json || { echo "Failed to fetch tunnels"; exit 1; }
-          APP_URL=$(jq -r '.tunnels[0].public_url' tunnels.json)
-          echo "Generated URL: $APP_URL"
-          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          curl $APP_URL || { echo "Health check failed"; exit 1; }
+          echo "Testing ${ { steps.geturl.outputs.app_url } }"
+          curl -v "${ { steps.geturl.outputs.app_url } }"
