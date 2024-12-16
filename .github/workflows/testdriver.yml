@@ -35,4 +35,4 @@ jobs:
           APP_URL=$(jq -r '.tunnels[0].public_url' tunnels.json)
           echo "Generated URL: $APP_URL"
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          curl $APP_URL/health-check || { echo "Health check failed"; exit 1; }
+          curl $APP_URL || { echo "Health check failed"; exit 1; }
