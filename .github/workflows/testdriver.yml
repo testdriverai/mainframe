@@ -21,15 +21,15 @@ jobs:
       
       - name: Install ngrok
         run: |
-          wget https://bin.equinox.io/c/111111/ngrok-stable-linux-amd64.zip
-          unzip ngrok-stable-linux-amd64.zip
-          sudo mv ngrok /usr/local/bin
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
       
       - name: Start ngrok and expose
         id: expose
         run: |
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }} || { echo "Ngrok auth token failed"; exit 1; }
-          ngrok http http://localhost:8080 > ngrok.log &
+          ngrok http 8080 > ngrok.log &
           sleep 10
           curl --silent http://localhost:4040/api/tunnels > tunnels.json || { echo "Failed to fetch tunnels"; exit 1; }
           APP_URL=$(jq -r '.tunnels[0].public_url' tunnels.json)
