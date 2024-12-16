@@ -27,12 +27,15 @@ jobs:
           APP_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
           echo "Generated URL: $APP_URL"
           echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
       - name: Debug ngrok logs
         run: cat ngrok.log
       - name: Test Against URL
         run: |
           # Since we are still in the same job, ngrok is still running
+          if [ -z "$APP_URL" ]; then
+            echo "Error: URL is empty"
+            exit 1
+          fi
           curl "$APP_URL/health-check"
 
   # test_url:
