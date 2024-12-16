@@ -12,22 +12,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # 1. Run your application container
       - name: Start Nginx Container
         run: docker run -d -p 8080:80 nginx:latest
-
-      # 2. Run ngrok in a Docker container, tunneling port 8080
       - name: Start ngrok Container
         run: |
           docker run -d --name myngrok \
             -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} \
             -p 4040:4040 \
             ngrok/ngrok:latest http host.docker.internal:8080
-
       - name: Wait for ngrok
         run: sleep 10
-
+      - name: Debug ngrok logs
+        run: |
+          docker logs myngrok
       - name: Get ngrok URL
         id: geturl
         run: |
