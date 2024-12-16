@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [start_container]
     steps:
-      - run: curl -s -o /dev/null -w "%{http_code}" ${{ needs.start_container.outputs.app_url }}
+      - run: curl ${{needs.start_container.outputs.app_url}}/health-check
   # test:
   #   name: "TestDriver"
   #   runs-on: ubuntu-latest
