@@ -36,15 +36,14 @@ jobs:
           # Fetch logs from the ngrok container
           logs=$(docker logs myngrok 2>&1)
           echo "$logs"
-          # The logs often contain a line like:
-          # Forwarding                    https://<random>.ngrok-free.app -> http://host.docker.internal:8080
-          # Use grep or sed to extract the public URL
-          public_url=$(echo "$logs" | grep -oE "https://[0-9a-zA-Z.-]+\.ngrok-free.app")
-          echo "Found URL: $public_url"
-          echo "app_url=$public_url" >> $GITHUB_OUTPUT
+          APP_URL=$(echo "$logs" | grep -oE "https://[0-9a-zA-Z.-]+\.ngrok-free.app")
+          echo "Found URL: $APP_URL"
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+      - name: Debug ngrok logs
+        run: cat ngrok.log
 
       # 4. Test against the public URL in the same job
       - name: Test URL
         run: |
-          echo "Testing ${ { steps.geturl.outputs.app_url } }"
-          curl -v "${ { steps.geturl.outputs.app_url } }/health-check"
+          echo "Testing $APP_URL"
+          curl "$APP_URL"
