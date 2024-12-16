@@ -15,7 +15,7 @@ jobs:
 
       # 1. Run your application container
       - name: Start Nginx Container
-        run: docker run -d --name myapp -p 8080:80 nginx:latest
+        run: docker run -d -p 8080:80 nginx:latest
 
       # 2. Run ngrok in a Docker container, tunneling port 8080
       - name: Start ngrok Container
@@ -47,4 +47,4 @@ jobs:
       - name: Test URL
         run: |
           echo "Testing ${ { steps.geturl.outputs.app_url } }"
-          curl -v "${ { steps.geturl.outputs.app_url } }"
+          curl -v "${ { steps.geturl.outputs.app_url } }/health-check"
