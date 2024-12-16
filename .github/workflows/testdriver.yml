@@ -15,7 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run Nginx Container
-        run: docker run -d -p 8080:80 nginx:latest
+        run: |
+          docker run -d -p 8080:8080 nginx:latest
       - name: Install ngrok
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
