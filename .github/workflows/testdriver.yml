@@ -2,33 +2,43 @@ name: TestDriver.ai
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "windows-testdriver"]
   pull_request:
   workflow_dispatch:
 
 jobs:
+  start_container:
+    runs-on: ubuntu-latest
+    outputs:
+      app_url: ${{ steps.expose.outputs.app_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Nginx Container
+        run: docker run -d -p 8080:80 nginx:latest
+      - name: Setup ngrok (or similar)
+        id: expose
+        run: |
+          curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -o ngrok.zip
+          unzip ngrok.zip
+          ./ngrok http 8080 > ngrok.log &
+          sleep 5
+          APP_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+
   test:
     name: "TestDriver"
     runs-on: ubuntu-latest
+    needs: [start_container]
     steps:
       - uses: testdriverai/action@main
         with:
           key: ${{secrets.TESTDRIVER_API_KEY}}
           prompt: |
-            1. /run testdriver/test.yml
+            1. check if the app is running.
           prerun: |
-            cd $env:TEMP
-            npm init -y
-            npm install dashcam-chrome
-            npm create mainframe
-            cd mainframe
-            Remove-Item -Path package-lock.json -Force
-            Remove-Item -Path node_modules -Recurse -Force -ErrorAction SilentlyContinue
-            npm install
-            npm start
-            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
+            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ needs.start_container.outputs.app_url }}"
             exit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
-          LOCALHOST: "http://localhost:8744"
