@@ -27,6 +27,7 @@ jobs:
             Start-Job -ScriptBlock {
               npx turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
             } >> $logPath
+            echo "waiting for port to be live"
             # Wait for the port to be live by monitoring the output logs
             $portLive = $false
 
@@ -34,8 +35,10 @@ jobs:
                 Start-Sleep -Seconds 1
                 if (Select-String -Path $logPath -Pattern "Local:   http://localhost:8744/") {
                     $portLive = $true
+                    echo "Port is live"
                 }
             }
+            echo "starting chrome"
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
             exit
         env:
