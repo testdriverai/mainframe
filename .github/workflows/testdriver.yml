@@ -29,7 +29,7 @@ jobs:
             npm run db:migrate
             Start-Job -ScriptBlock {
               npx turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
-            } | Out Null
+            } | Out-Null
           
             # Wait for the port to be live by monitoring the output logs
             $portLive = $false
