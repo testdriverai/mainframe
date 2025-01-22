@@ -18,25 +18,18 @@ jobs:
             1. /run testdriver/test.yml
           prerun: |
             cd $env:TEMP
-            npm init -y
-            npm install dashcam-chrome
-            git clone https://github.com/testdriverai/mainframe.git
-            cd mainframe
             npm install
+            npm install dashcam-chrome
             node scripts/generate-env.mjs
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             npm run build -- --filter='!@mainframe-api/docs' --ui=stream --output-logs=errors-only
             npm run db:migrate
+            $logPath = ".\logs.txt"
             Start-Job -ScriptBlock {
               npx turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
-            } | Out-Null
-          
+            } >> $logPath
             # Wait for the port to be live by monitoring the output logs
             $portLive = $false
-            $logPath = ".\logs.txt"
-            
-            # Run the server and redirect output to a log file
-            Start-Process -FilePath "cmd.exe" -ArgumentList "/c npx turbo run \"@mainframe-api/webapp:dev\" > $logPath" -NoNewWindow -Wait
 
             while (-not $portLive) {
                 Start-Sleep -Seconds 1
@@ -44,7 +37,7 @@ jobs:
                     $portLive = $true
                 }
             }
-            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/../node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
+            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
             exit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
