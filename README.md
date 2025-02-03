@@ -19,6 +19,7 @@ Run these commands to get started with Mainframe:
 ```sh
 npm create mainframe
 cd mainframe
+npm install
 npm start
 ```
 
