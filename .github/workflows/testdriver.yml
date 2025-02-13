@@ -19,23 +19,31 @@ jobs:
           prerun: |
             npm install
             npm install dashcam-chrome
-            node scripts/generate-env.mjs
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            npm run build -- --filter='!@mainframe-api/docs' --ui=stream --output-logs=errors-only
-            npm run db:migrate
-            $logPath = ".\logs.txt"
             Start-Job -ScriptBlock {
-              npx turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
-            } >> $logPath
+            echo "starting npm server"
+            npm start
+            }
             echo "waiting for port to be live"
-            # Wait for the port to be live by monitoring the output logs
             $portLive = $false
+            $targetUrl = "${{ env.LOCALHOST }}"
+            Write-Output "Beginning port checks for $targetUrl"
 
             while (-not $portLive) {
-                Start-Sleep -Seconds 1
-                if (Select-String -Path $logPath -Pattern "Local:   http://localhost:8744/") {
-                    $portLive = $true
-                    echo "Port is live"
+                try {
+                    $response = Invoke-WebRequest -Uri $targetUrl -Method Head -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+                    if ($response.StatusCode -eq 200) {
+                        $portLive = $true
+                        Write-Output "Port is live (HTTP 200)"
+                    }
+                }
+                catch [Microsoft.PowerShell.Commands.HttpResponseException] {
+                    if ($_.Exception.Response.StatusCode -eq 404) {
+                        $portLive = $true
+                        Write-Output "Server responded with 404 - assuming valid response"
+                    }
+                }
+                catch {
+                    Start-Sleep -Seconds 1
                 }
             }
             echo "starting chrome"
