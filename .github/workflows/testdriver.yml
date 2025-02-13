@@ -36,19 +36,19 @@ jobs:
                         Write-Output "Port is live (HTTP 200)"
                     }
                 }
-                catch [Microsoft.PowerShell.Commands.HttpResponseException] {
-                    if ($_.Exception.Response.StatusCode -eq 404) {
+                catch {
+                    # Check if the error response has a 404 status code
+                    if ($_.Exception.Response.StatusCode.value__ -eq 404) {
                         $portLive = $true
                         Write-Output "Server responded with 404 - assuming valid response"
+                    } else {
+                        Start-Sleep -Seconds 1
                     }
                 }
-                catch {
-                    Start-Sleep -Seconds 1
-                }
             }
-            echo "starting chrome"
+
+            Write-Output "Starting Chrome"
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
-            exit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
