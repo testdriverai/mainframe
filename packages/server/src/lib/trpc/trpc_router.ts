@@ -26,9 +26,11 @@ import {
   getDatasetObject,
   getDatasetTable,
   getIntegrationForDataset,
+  getIntegrationFromType,
   zOAuthCredentials,
   zTokenCredentials,
 } from "../integrations.ts";
+import { integrationsMap } from "../integrationsMap.ts";
 import { deserializeData } from "../../utils/serialization.ts";
 import { createUserAccount, validateUserAccount } from "./auth.ts";
 import { checkIfUserExists } from "./db-helpers.ts";
@@ -36,19 +38,6 @@ import { env } from "../env.server.ts";
 import { nango } from "../nango.ts";
 import { trpcMiddleware } from "@sentry/core";
 import { getTokenFromDataset } from "../integration-token.ts";
-import { github } from "../integrations/github.ts";
-import { peloton } from "../integrations/peloton.ts";
-import { posthog } from "../integrations/posthog.ts";
-import { toggl } from "../integrations/toggl.ts";
-import { google } from "../integrations/google.ts";
-import { zotero } from "../integrations/zotero.ts";
-import { notion } from "../integrations/notion.ts";
-import { oura } from "../integrations/oura.ts";
-import { valtown } from "../integrations/valtown.ts";
-import { spotify } from "../integrations/spotify.ts";
-import { render } from "../integrations/render.ts";
-import { vercel } from "../integrations/vercel.ts";
-import { bitbucket } from "../integrations/bitbucket.ts";
 import { getTableData } from "./table-data.ts";
 import {
   generateObjectComponent,
@@ -56,6 +45,7 @@ import {
 } from "../llm/openai.ts";
 import { getObjectAndDataset } from "./object-data.ts";
 import { nanoid } from "nanoid";
+import { mapObject } from "../../utils/map-object.ts";
 
 /**
  * Initialization of tRPC backend
@@ -73,6 +63,16 @@ const sentryMiddleware = t.middleware(
 const procedure = t.procedure.use(sentryMiddleware);
 
 const router = t.router;
+
+const clientIntegrationsInfo = mapObject(integrationsMap, (v) => ({
+  client: createClientIntegration(v),
+  openApiSpec: v.openapiSpecs?.[0],
+}));
+
+const allClientIntegrations = mapObject(
+  clientIntegrationsInfo,
+  (v) => v.client,
+);
 
 async function getUserInfoFromCtx(ctx: Context): Promise<{
   user: UserInfo | undefined;
@@ -308,9 +308,35 @@ export const appRouter = router({
   datasetsCreate: protectedProcedure
     .input(zDatasetInsert)
     .mutation(async ({ input, ctx }) => {
+      const integration = getIntegrationFromType(
+        input.integrationType ?? undefined,
+      );
+
+      if (!integration) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const credentials: DatasetCredentials | undefined = integration.authTypes
+        ?.form
+        ? zTokenCredentials.parse(
+            await integration.authTypes.form.onSubmit(input.credentials),
+          )
+        : integration.authType === "token"
+        ? zTokenCredentials.parse(input.credentials)
+        : integration.authType === "oauth2"
+        ? zOAuthCredentials.parse(input.credentials)
+        : undefined;
+
+      if (!credentials) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Error matching credentials",
+        });
+      }
+
       const [dataset] = await ctx.db
         .insert(datasetsTable)
-        .values(input)
+        .values({ ...input, credentials })
         .returning();
 
       if (!dataset) {
@@ -338,6 +364,7 @@ export const appRouter = router({
 
       return dataset;
     }),
+  // DEPRECATED
   datasetsSetAuth: protectedProcedure
     .input(z.object({ datasetId: z.string(), params: z.record(z.string()) }))
     .mutation(async ({ input, ctx }) => {
@@ -357,34 +384,30 @@ export const appRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      if (integration.authTypes?.form) {
-        await integration.authTypes.form.onSubmit(
-          dataset,
-          input.params,
-          ctx.db,
-        );
-      } else {
-        const credentials: DatasetCredentials | undefined =
-          integration.authType === "token"
-            ? zTokenCredentials.parse(input.params)
-            : integration.authType === "oauth2"
-            ? zOAuthCredentials.parse(input.params)
-            : undefined;
+      const credentials: DatasetCredentials | undefined = integration.authTypes
+        ?.form
+        ? zTokenCredentials.parse(
+            await integration.authTypes.form.onSubmit(input.params),
+          )
+        : integration.authType === "token"
+        ? zTokenCredentials.parse(input.params)
+        : integration.authType === "oauth2"
+        ? zOAuthCredentials.parse(input.params)
+        : undefined;
 
-        if (!credentials) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Error matching credentials",
-          });
-        }
-
-        await ctx.db
-          .update(datasetsTable)
-          .set({
-            credentials,
-          })
-          .where(eq(datasetsTable.id, input.datasetId));
+      if (!credentials) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Error matching credentials",
+        });
       }
+
+      await ctx.db
+        .update(datasetsTable)
+        .set({
+          credentials,
+        })
+        .where(eq(datasetsTable.id, input.datasetId));
     }),
   datasetsDelete: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -533,26 +556,31 @@ export const appRouter = router({
 
   // Integrations
   integrationsAll: procedure.query((): Record<string, ClientIntegration> => {
-    return {
-      google: createClientIntegration(google),
-      toggl: createClientIntegration(toggl),
-      posthog: createClientIntegration(posthog),
-      github: createClientIntegration(github),
-      render: createClientIntegration(render),
-      vercel: createClientIntegration(vercel),
-      peloton: createClientIntegration(peloton),
-      // network: createClientIntegration(network),
-      zotero: createClientIntegration(zotero),
-      notion: createClientIntegration(notion),
-      oura: createClientIntegration(oura),
-      bitbucket: createClientIntegration(bitbucket),
-      valtown: createClientIntegration(valtown),
-      ...(env.NANGO_PRIVATE_KEY
-        ? { spotify: createClientIntegration(spotify) }
-        : {}),
-    };
+    return allClientIntegrations;
   }),
+  integration: procedure
+    .input(
+      z.object({
+        id: z.string(),
+        includeOpenAPI: z.boolean().optional().default(false),
+      }),
+    )
+    .query(
+      ({
+        input: { id, includeOpenAPI },
+      }): ClientIntegration & { openApiSpec?: string } => {
+        const integration = clientIntegrationsInfo[id];
+        if (!integration) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        if (!includeOpenAPI) {
+          return integration.client;
+        }
+        return { ...integration.client, openApiSpec: integration.openApiSpec };
+      },
+    ),
 
+  // DEPRECATED
   checkNangoIntegration: protectedProcedure
     .input(z.object({ datasetId: z.string() }))
     .mutation(async ({ input, ctx }) => {
@@ -596,10 +624,66 @@ export const appRouter = router({
         .set({
           credentials: {
             nangoIntegrationId,
+            nangoConnectionId: dataset.id,
           },
         })
         .where(eq(datasetsTable.id, input.datasetId));
     }),
+
+  datasetCreateWithNango: protectedProcedure
+    .input(
+      z.object({
+        integrationType: z.string().min(1),
+        nangoIntegrationId: z.string().min(1),
+        nangoConnectionId: z.string().min(1),
+      }),
+    )
+    .mutation(
+      async ({
+        input: { integrationType, nangoConnectionId, nangoIntegrationId },
+        ctx,
+      }) => {
+        if (!nango) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        const integration = getIntegrationFromType(integrationType);
+
+        if (!integration) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        const nangoConnection = await nango.getConnection(
+          nangoIntegrationId,
+          nangoConnectionId,
+        );
+
+        if (!nangoConnection) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        // Create the dataset
+        const [dataset] = await ctx.db
+          .insert(datasetsTable)
+          .values({
+            name: integration.name,
+            integrationType,
+            credentials: {
+              nangoIntegrationId,
+              nangoConnectionId,
+            },
+          })
+          .returning();
+
+        if (!dataset) {
+          throw new TRPCError({ code: "CONFLICT" });
+        }
+
+        void syncDataset(ctx, dataset).catch((e) => console.error(e));
+
+        return dataset;
+      },
+    ),
 
   getAccessToken: protectedProcedure
     .input(z.object({ datasetId: z.string() }))

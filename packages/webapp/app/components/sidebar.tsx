@@ -3,7 +3,13 @@ import { Link, NavLink, useMatch } from "react-router-dom";
 import { datasetIcon } from "../lib/integrations/icons/datasetIcon";
 import { Dataset } from "@mainframe-api/shared";
 import { useLogout } from "../lib/use-logout";
-import { LayoutGridIcon, LineChartIcon, Loader2Icon } from "lucide-react";
+import {
+  LayoutGridIcon,
+  LineChartIcon,
+  Loader2Icon,
+  IdCardIcon,
+  GlobeIcon,
+} from "lucide-react";
 import { trpc } from "../lib/trpc_client";
 import { ReactNode } from "react";
 
@@ -33,12 +39,11 @@ export function SidebarButton({
         <span
           className={cn([
             "flex items-center gap-1.5 px-2 py-2 rounded-lg",
-            "text-slate-900",
-            "group-hover:bg-slate-300/40",
-            "relative before:border before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:rounded-lg",
+            "text-gray-800",
+            "group-hover:bg-amber-300/40 group-hover:text-amber-950",
             (isActive ? isActive(isNavLinkActive) : isNavLinkActive)
-              ? "before:bg-white before:border-slate-900 shadow-0-2 text-black"
-              : "before:bg-transparent before:border-transparent shadow-0 text-black/60",
+              ? "bg-amber-100/80 text-amber-950 [&>*:first-child]:text-amber-600"
+              : "",
           ])}
         >
           {icon}
@@ -57,7 +62,7 @@ export function SidebarDatasetButton({ dataset }: { dataset: Dataset }) {
 
   return (
     <SidebarButton
-      href={`/dataset/${dataset.id}`}
+      href={`/accounts/${dataset.id}`}
       icon={
         icon ? (
           <img className="relative h-4 w-4 m-0.5 object-contain" src={icon} />
@@ -115,10 +120,20 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
       ])}
       aria-label="Sidebar"
     >
-      <div className="h-full flex flex-col px-3 py-4 overflow-y-auto bg-gradient-to-b from-sky-50 to-emerald-50">
+      <div
+        className={cn(
+          "h-full flex flex-col px-3 py-4 overflow-y-auto",
+          "sm:border-r",
+          "bg-background",
+        )}
+      >
         <Link
           to="/"
-          className="grow-0 shrink-0 mb-2 self-start pb-1 px-1 mx-1.5 pt-1.5 w-auto inline-block transition-colors duration-200 border-gray-400 hover:border-amber-400 dark:border-gray-700 hover:dark:border-amber-700"
+          className={cn(
+            "grow-0 shrink-0 mb-2 self-start pb-1 px-1 mx-1.5 pt-1.5 w-auto inline-block",
+            "text-amber-950",
+            "transition-colors duration-200 border-b-2 border-amber-950/30 hover:border-amber-400 dark:border-gray-700 hover:dark:border-amber-700",
+          )}
         >
           <svg
             viewBox="0 0 342 50"
@@ -134,22 +149,10 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
           </svg>
         </Link>
         <section className="pt-8">
-          <SidebarButton
-            href="/projects"
-            name={() => "Projects"}
-            icon={<LayoutGridIcon className="relative w-5 h-5" />}
-          />
-          {!hideDashboard && (
-            <SidebarButton
-              href="/dashboard"
-              name={() => "Dashboard"}
-              icon={<LineChartIcon className="relative w-5 h-5" />}
-            />
-          )}
-          <SidebarButton
+          {/* <SidebarButton
             href="/new"
             isActive={(isActive) => isActive || !!isIndexPath}
-            name={() => "New Dataset"}
+            name={() => "New Account"}
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -168,9 +171,37 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
                 </g>
               </svg>
             }
+          /> */}
+          <h2 className="opacity-50 text-xs font-medium px-1 uppercase mb-2">
+            Warehouse
+          </h2>
+          <SidebarButton
+            href="/accounts"
+            name={() => "Accounts"}
+            icon={<IdCardIcon className="relative w-5 h-5" />}
           />
+          <h2 className="opacity-50 text-xs font-medium px-1 mt-8 uppercase mb-2">
+            Build
+          </h2>
+          <SidebarButton
+            href="/apis"
+            name={() => "APIs"}
+            icon={<GlobeIcon className="relative w-5 h-5" />}
+          />
+          <SidebarButton
+            href="/projects"
+            name={() => "Projects"}
+            icon={<LayoutGridIcon className="relative w-5 h-5" />}
+          />
+          {!hideDashboard && (
+            <SidebarButton
+              href="/dashboard"
+              name={() => "Dashboard"}
+              icon={<LineChartIcon className="relative w-5 h-5" />}
+            />
+          )}
         </section>
-        {(datasets ?? []).length > 0 ? (
+        {/* {(datasets ?? []).length > 0 ? (
           <section className="pt-4">
             <h2 className="opacity-50 text-sm px-1">Datasets</h2>
             <ul className="w-full flex-shrink flex-1">
@@ -183,7 +214,7 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
               })}
             </ul>
           </section>
-        ) : null}
+        ) : null} */}
         <div className="flex-1" />
         <div className="flex gap-2">
           <button
@@ -192,8 +223,8 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
             }}
             className={cn([
               "flex w-0 flex-1 items-center gap-1.5 p-2 rounded-lg",
-              "text-sm text-slate-500 hover:text-slate-500",
-              "hover:bg-slate-300/40",
+              "text-sm text-gray-500 hover:text-amber-950",
+              "hover:bg-amber-300/40",
             ])}
             disabled={logout.isLoading}
           >
@@ -212,7 +243,7 @@ export function Sidebar({ sidebarOpen }: SidebarProps) {
             title="Discord"
             className={cn([
               "flex items-center justify-center gap-1.5 p-2 rounded-lg",
-              "text-slate-400 hover:text-slate-900",
+              "text-gray-400 hover:text-gray-900",
               "",
               "h-10 w-10 text-center",
             ])}

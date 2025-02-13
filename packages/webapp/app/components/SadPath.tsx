@@ -1,6 +1,7 @@
 import { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@mainframe-api/server";
 import { isTrpcNotFoundError } from "../utils/errors";
+import { useEffect } from "react";
 
 export function SadPath({
   className,
@@ -11,6 +12,13 @@ export function SadPath({
   error?: TRPCClientErrorLike<AppRouter> | undefined | null;
   isLoading?: boolean;
 }) {
+  useEffect(() => {
+    if (error) {
+      console.error(error);
+    } else if (!isLoading) {
+      console.log("No error, not loading");
+    }
+  }, [error, isLoading]);
   return (
     <div className={className}>
       {isTrpcNotFoundError(error ?? undefined) ? (

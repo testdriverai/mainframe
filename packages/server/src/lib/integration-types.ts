@@ -2,6 +2,7 @@ import {
   Dataset,
   AuthType,
   ComputedDataParamsDef,
+  DatasetCredentials,
 } from "@mainframe-api/shared";
 import { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
 import { MainframeContext } from "./context";
@@ -43,12 +44,15 @@ export interface Integration {
       }[];
       info?: string;
       onSubmit(
-        dataset: Dataset,
         params: Record<string, string>,
-        db: SqliteRemoteDatabase<Record<string, never>>,
-      ): Promise<void>;
+      ): Promise<DatasetCredentials | undefined>;
     };
   };
+  /**
+   * Array of strings. Each item is an OpenAPI spec in JSON format.
+   * TODO: Support yaml
+   */
+  openapiSpecs?: string[];
   proxyFetch?: (
     token: string,
     path: string,
