@@ -20,8 +20,8 @@ jobs:
             npm install
             npm install dashcam-chrome
             Start-Job -ScriptBlock {
-            echo "starting npm server"
-            npm start
+              echo "starting npm server"
+              npm start
             }
             echo "waiting for port to be live"
             $portLive = $false
@@ -31,18 +31,9 @@ jobs:
             while (-not $portLive) {
                 try {
                     $response = Invoke-WebRequest -Uri $targetUrl -Method Head -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-                    if ($response.StatusCode -eq 200) {
+                    if ($response.StatusCode -eq 200 -or $response.StatusCode -eq 404) {
                         $portLive = $true
                         Write-Output "Port is live (HTTP 200)"
-                    }
-                }
-                catch {
-                    # Check if the error response has a 404 status code
-                    if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                        $portLive = $true
-                        Write-Output "Server responded with 404 - assuming valid response"
-                    } else {
-                        Start-Sleep -Seconds 1
                     }
                 }
             }
