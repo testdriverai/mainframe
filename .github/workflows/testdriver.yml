@@ -25,7 +25,7 @@ jobs:
               echo "starting npm server"
               npm start
             }
-            Start-Sleep -Seconds 120
+            Start-Sleep -Seconds 240
 
             Write-Output "Starting Chrome"
             Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
