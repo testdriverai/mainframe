@@ -18,8 +18,7 @@ jobs:
             1. /run testdriver/test.yml
           prerun: |
             echo "the current directory is $(pwd)"
-            cd mainframe
-            echo "the current directory is $(pwd)"
+            echo "contains $(ls)"
             echo "installing dependencies"
             npm install
             echo "installing dashcam-chrome"
