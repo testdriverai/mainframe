@@ -35,6 +35,8 @@ jobs:
                         $portLive = $true
                         Write-Output "Port is live (HTTP 200)"
                     }
+                } catch {
+                    Start-Sleep -Seconds 1
                 }
             }
 
