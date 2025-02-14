@@ -29,13 +29,12 @@ jobs:
             Write-Output "Beginning port checks for $targetUrl"
 
             while (-not $portLive) {
-                try {
-                    $response = Invoke-WebRequest -Uri $targetUrl -Method Head -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-                    if ($response.StatusCode -eq 200 -or $response.StatusCode -eq 404) {
-                        $portLive = $true
-                        Write-Output "Port is live (HTTP 200)"
-                    }
-                } catch {
+                $response = Invoke-WebRequest -Uri $targetUrl -Method Head -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+                if ($response.StatusCode -eq 200 -or $response.StatusCode -eq 404) {
+                    $portLive = $true
+                    Write-Output "Port is live (HTTP 200)"
+                } else {
+                    Write-Output "Port is not live (HTTP $($response.StatusCode))"
                     Start-Sleep -Seconds 1
                 }
             }
