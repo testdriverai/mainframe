@@ -26,11 +26,11 @@ jobs:
             echo "generate env"
             node scripts/generate-env.mjs
             echo "build"
-            npm run build --filter='!@mainframe-api/docs' --ui=stream --output-logs=errors-only --concurrency=1
+            turbo run build --filter='!@mainframe-api/docs' --output-logs=errors-only --concurrency=1
             echo "migrate db"
             npm run db:migrate
             echo "start server"
-            npm run dev
+            turbo run "@mainframe-api/node#serve" dev --env-mode=loose --filter='!@mainframe-api/node' --filter='!@mainframe-api/docs' --ui=tui
             # echo "waiting for 500 seconds"
             # sleep 500
             exit 0
