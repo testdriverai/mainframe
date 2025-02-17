@@ -23,8 +23,14 @@ jobs:
             npm install dashcam-chrome
             echo "update broswerlist"
             npx update-browserslist-db@latest
-            echo "starting npm server"
-            npm start
+            echo "generate env"
+            node scripts/generate-env.mjs
+            echo "build"
+            npm run build -- --ui=stream --output-logs=errors-only --concurrency=1
+            echo "migrate db"
+            npm run db:migrate
+            echo "start server"
+            npm run dev
             # echo "waiting for 500 seconds"
             # sleep 500
             exit 0
