@@ -26,7 +26,7 @@ jobs:
             echo "generate env"
             node scripts/generate-env.mjs
             echo "build"
-            npm run build -- --ui=stream --output-logs=errors-only --concurrency=1
+            npm run build --filter='!@mainframe-api/docs' --ui=stream --output-logs=errors-only --concurrency=1
             echo "migrate db"
             npm run db:migrate
             echo "start server"
