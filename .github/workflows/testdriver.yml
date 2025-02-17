@@ -17,6 +17,8 @@ jobs:
           prompt: |
             1. /run testdriver/test.yml
           prerun: |
+            echo "install turbo"
+            npm install turbo -g
             echo "installing dependencies"
             npm install
             echo "installing dashcam-chrome"
