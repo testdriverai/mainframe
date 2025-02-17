@@ -35,3 +35,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
           LOCALHOST: "http://localhost:8744"
+          NODE_OPTIONS: "--max-old-space-size=8192"
