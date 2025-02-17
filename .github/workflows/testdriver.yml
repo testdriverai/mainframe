@@ -17,20 +17,18 @@ jobs:
           prompt: |
             1. /run testdriver/test.yml
           prerun: |
-            echo "the current directory is $(pwd)"
-            echo "contains $(ls)"
             echo "installing dependencies"
             npm install
             echo "installing dashcam-chrome"
             npm install dashcam-chrome
-            Start-Job -ScriptBlock {
-              echo "starting npm server"
-              npm start
-            }
-            Start-Sleep -Seconds 500
+            echo "starting npm server"
+            npm start
+            # echo "waiting for 500 seconds"
+            # sleep 500
+            exit 0
 
-            Write-Output "Starting Chrome"
-            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
+            # Write-Output "Starting Chrome"
+            # Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ env.LOCALHOST }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
