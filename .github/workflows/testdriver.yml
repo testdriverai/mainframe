@@ -21,6 +21,8 @@ jobs:
             npm install
             echo "installing dashcam-chrome"
             npm install dashcam-chrome
+            echo "update broswerlist"
+            npx update-browserslist-db@latest
             echo "starting npm server"
             npm start
             # echo "waiting for 500 seconds"
