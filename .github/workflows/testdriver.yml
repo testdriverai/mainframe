@@ -17,6 +17,8 @@ jobs:
           prompt: |
             1. /run testdriver/test.yml
           prerun: |
+            echo "installing pnpm"
+            npm install pnpm -g
             echo "install turbo"
             pnpm install turbo -g
             echo "installing dependencies"
