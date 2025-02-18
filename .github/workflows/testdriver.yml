@@ -30,7 +30,7 @@ jobs:
             echo "generate env"
             node scripts/generate-env.mjs
             echo "build"
-            turbo run build --filter='!@mainframe-api/docs' --output-logs=errors-only --concurrency=1
+            npm turbo run build --filter='!@mainframe-api/docs' --output-logs=errors-only --concurrency=1
             echo "migrate db"
             npm run db:migrate
             echo "start server"
